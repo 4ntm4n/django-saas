@@ -10,8 +10,6 @@ def home_page_view(request, *args, **kwargs):
     qs = PageVisit.objects.all()
     page_qs = PageVisit.objects.filter(path=request.path)
     my_title = "my Page"
-
-    print("!!!", request.path)
     my_context = {
         "page_title" : my_title,
         "page_visit_count": page_qs.count(),
@@ -21,6 +19,3 @@ def home_page_view(request, *args, **kwargs):
     html_=""
 
     return render(request, html_template, my_context)
-
-
-
