@@ -1,6 +1,5 @@
 # ignore vendor static files
-src/saas/staticfiles/vendors
-
+src/staticfiles/vendors/
 # ignore local static file root
 local-cdn/
 

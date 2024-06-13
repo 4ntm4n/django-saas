@@ -43,6 +43,12 @@ RUN pip install -r /code/requirements.txt
 # Copy the project code into the container's working directory
 COPY ./src /code
 
+# pull static files
+RUN python manage.py vendor_pull
+RUN python manage.py collectstatic --noinput
+#whitenoise
+
+
 # Set the Django default project name
 ARG PROJ_NAME="saas"
 
