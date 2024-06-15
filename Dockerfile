@@ -16,7 +16,7 @@ RUN pip install --upgrade pip
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Install OS dependencies for our mini VM
+# Install os dependencies for our mini vm
 RUN apt-get update && apt-get install -y \
     # for postgres
     libpq-dev \
@@ -28,49 +28,46 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Create the mini VM's code directory
+# Create the mini vm's code directory
 RUN mkdir -p /code
 
 # Set the working directory to that same code directory
 WORKDIR /code
 
 # Copy the requirements file into the container
-COPY requirements.txt /code/requirements.txt
+COPY requirements.txt /tmp/requirements.txt
 
-# Install the Python project requirements
-RUN pip install -r /code/requirements.txt
-
-# Copy the project code into the container's working directory
+# copy the project code into the container's working directory
 COPY ./src /code
 
+# Install the Python project requirements
+RUN pip install -r /tmp/requirements.txt
+
 ARG DJANGO_SECRET_KEY
-ENV DJANGO_SECRET_KEY = ${DJANGO_SECRET_KEY}
+ENV DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
 
-ARG DJANGO_DEBUG 
-ENV DJANGO_DEBUG = ${DJANGO_DEBUG}
+ARG DJANGO_DEBUG=0
+ENV DJANGO_DEBUG=${DJANGO_DEBUG}
 
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
-
-# pull static files
+# database isn't available during build
+# run any other commands that do not need the database
+# such as:
 RUN python manage.py vendor_pull
 RUN python manage.py collectstatic --noinput
-#whitenoise
+# whitenoise -> s3
 
-
-# Set the Django default project name
+# set the Django default project name
 ARG PROJ_NAME="saas"
 
-# Create a bash script to run the Django project
-# This script will execute at runtime when the container starts and the database is available
+# create a bash script to run the Django project
+# this script will execute at runtime when
+# the container starts and the database is available
 RUN printf "#!/bin/bash\n" > ./paracord_runner.sh && \
     printf "RUN_PORT=\"\${PORT:-8000}\"\n\n" >> ./paracord_runner.sh && \
-    printf "echo 'Running migrations...'\n" >> ./paracord_runner.sh && \
     printf "python manage.py migrate --no-input\n" >> ./paracord_runner.sh && \
-    printf "echo 'Starting Gunicorn on port '\$RUN_PORT'...'\n" >> ./paracord_runner.sh && \
-    printf "gunicorn ${PROJ_NAME}.wsgi:application --bind \"0.0.0.0:\$RUN_PORT\" --log-level debug\n" >> ./paracord_runner.sh
+    printf "gunicorn ${PROJ_NAME}.wsgi:application --bind \"0.0.0.0:\$RUN_PORT\"\n" >> ./paracord_runner.sh
 
-# Make the bash script executable
+# make the bash script executable
 RUN chmod +x paracord_runner.sh
 
 # Clean up apt cache to reduce image size
@@ -79,5 +76,6 @@ RUN apt-get remove --purge -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Run the Django project via the runtime script when the container starts
+# Run the Django project via the runtime script
+# when the container starts
 CMD ./paracord_runner.sh
