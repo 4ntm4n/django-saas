@@ -43,6 +43,15 @@ RUN pip install -r /code/requirements.txt
 # Copy the project code into the container's working directory
 COPY ./src /code
 
+ARG DJANGO_SECRET_KEY
+ENV DJANGO_SECRET_KEY = ${DJANGO_SECRET_KEY}
+
+ARG DJANGO_DEBUG 
+ENV DJANGO_DEBUG = ${DJANGO_DEBUG}
+
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
 # pull static files
 RUN python manage.py vendor_pull
 RUN python manage.py collectstatic --noinput

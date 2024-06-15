@@ -11,7 +11,7 @@ VENDOR_STATICFILES = {
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        self.stdout.write("dowloading vendor files...")
+        self.stdout.write("downloading vendor files...")
         completed_urls = []
         for name, url in VENDOR_STATICFILES.items():
             out_path = STATICFILES_VENDOR_DIR / name
