@@ -50,7 +50,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # whitenoise middle
-    "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     # end whitenoise middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
